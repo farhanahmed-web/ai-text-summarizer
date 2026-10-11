@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Text Summarizer & Translator</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background-color: #121212; color: #e0e0e0; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .container { background-color: #1e1e1e; padding: 30px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.5); width: 500px; }
+        h2 { margin-top: 0; color: #00adb5; }
+        textarea { width: 100%; height: 120px; background-color: #2d2d2d; border: 1px solid #444; border-radius: 6px; color: #fff; padding: 10px; box-sizing: border-box; resize: none; font-size: 14px; }
+        select, button { width: 100%; padding: 12px; margin-top: 15px; border-radius: 6px; border: none; font-size: 16px; font-weight: bold; cursor: pointer; }
+        select { background-color: #2d2d2d; color: #fff; border: 1px solid #444; }
+        button { background-color: #00adb5; color: #fff; transition: background 0.2s; }
+        button:hover { background-color: #008087; }
+        .output-box { background-color: #252525; border-left: 4px solid #00adb5; padding: 15px; margin-top: 20px; border-radius: 4px; display: none; white-space: pre-line; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>🤖 AI Summarizer & Translator</h2>
+    <p style="font-size: 13px; color: #888;">Enter long text below to get a 3-bullet AI summary translated instantly.</p>
+    
+    <textarea id="inputText" placeholder="Paste your long article or text here..."></textarea>
+    
+    <select id="langSelect">
+        <option value="Telugu">Telugu</option>
+        <option value="Hindi">Hindi</option>
+        <option value="English">English</option>
+    </select>
+    
+    <button id="submitBtn" onclick="processText()">Generate AI Summary</button>
+    
+    <div id="outputCard" class="output-box"></div>
+</div>
+
+<script>
+    async function processText() {
+        const text = document.getElementById('inputText').value;
+        const targetLanguage = document.getElementById('langSelect').value;
+        const btn = document.getElementById('submitBtn');
+        const outputCard = document.getElementById('outputCard');
+        
+        if(!text.trim()) return alert("Please enter some text!");
+        
+        btn.innerText = "Processing with AI...";
+        btn.disabled = true;
+        outputCard.style.display = "none";
+        
+        try {
+            const response = await fetch('/api/summarize', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text, targetLanguage })
+            });
+            
+            const data = await response.json();
+            if(data.summary) {
+                outputCard.innerText = data.summary;
+                outputCard.style.display = "block";
+            } else {
+                outputCard.innerText = "Error: " + (data.error || "Failed to fetch response.");
+                outputCard.style.display = "block";
+            }
+        } catch (err) {
+            alert("Could not connect to the backend server.");
+        } finally {
+            btn.innerText = "Generate AI Summary";
+            btn.disabled = false;
+        }
+    }
+</script>
+</body>
+</html>
